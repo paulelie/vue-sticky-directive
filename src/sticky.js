@@ -48,6 +48,7 @@ class Sticky {
     const onStick = this.getAttribute('on-stick') || null
     const width = this.getAttribute('stick-width') || null
     const widthForce = this.getAttribute('stick-width-force') || null
+    const align = this.getAttribute('stick-align') || 'left'
 
     this.options = {
       topOffset: Number(offset.top) || 0,
@@ -56,6 +57,7 @@ class Sticky {
       shouldBottomSticky: side === 'bottom' || side === 'both',
       zIndex: zIndex,
       width,
+      align,
       widthForce,
       onStick: onStick
     }
@@ -127,6 +129,7 @@ class Sticky {
       height: this.getHeight(),
       width: this.getWidth(),
       xOffset: this.getXOffset(),
+      yOffset: this.getYOffset(),
       placeholderElRect: this.getPlaceholderElRect(),
       containerElRect: this.getContainerElRect()
     })
@@ -154,13 +157,13 @@ class Sticky {
   updateElements () {
     const placeholderStyle = { paddingTop: 0 }
     const elStyle = {
-      position: 'static',
+      position: 'absolute',
       top: 'auto',
       bottom: 'auto',
-      left: 'auto',
       width: 'auto',
       zIndex: this.options.zIndex
     }
+    elStyle[`${this.options.align}`] = '0px'
     const placeholderClassName = { 'vue-sticky-placeholder': true }
     const elClassName = {
       'vue-sticky-el': true,
@@ -171,7 +174,7 @@ class Sticky {
     if (this.state.isTopSticky) {
       elStyle.position = 'fixed'
       elStyle.top = this.options.topOffset + 'px'
-      elStyle.left = this.state.xOffset + 'px'
+      elStyle[`${this.options.align}`] = (this.options.align === 'left' ? this.state.xOffset : this.state.yOffset) + 'px'
       elStyle.width = this.state.width + 'px'
       const bottomLimit =
         this.state.containerElRect.bottom -
@@ -186,7 +189,7 @@ class Sticky {
     } else if (this.state.isBottomSticky) {
       elStyle.position = 'fixed'
       elStyle.bottom = this.options.bottomOffset + 'px'
-      elStyle.left = this.state.xOffset + 'px'
+      elStyle[`${this.options.align}`] = (this.options.align === 'left' ? this.state.xOffset : this.state.yOffset) + 'px'
       elStyle.width = this.state.width + 'px'
       const topLimit =
         window.innerHeight -
@@ -210,7 +213,7 @@ class Sticky {
   }
 
   resetElement () {
-    ['position', 'top', 'bottom', 'left', 'width', 'zIndex'].forEach(attr => {
+    ['position', 'top', 'bottom', 'left', 'right', 'width', 'zIndex'].forEach(attr => {
       this.el.style.removeProperty(attr)
     })
     this.el.classList.remove('bottom-sticky', 'top-sticky')
@@ -238,6 +241,10 @@ class Sticky {
 
   getXOffset () {
     return this.placeholderEl.getBoundingClientRect().left
+  }
+
+  getYOffset () {
+    return 0
   }
 
   getWidth () {

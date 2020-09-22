@@ -244,7 +244,8 @@ class Sticky {
   }
 
   getYOffset () {
-    return 0
+    const { left, width } = this.placeholderEl.getBoundingClientRect()
+    return document.documentElement.offsetWidth - left - width
   }
 
   getWidth () {
